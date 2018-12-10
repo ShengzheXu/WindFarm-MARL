@@ -1,11 +1,11 @@
-from generator import FlorisWrapper
-
+from sim.generator import FlorisWrapper
+import numpy as np
 
 class WindGym(object):
 
     def __init__(self):
         self.readTurbineMap()
-        self.simulator = FlorisWrapper(turbine_grid)
+        self.simulator = FlorisWrapper(self.turbineGrid)
         self.buildActionSpace()
 
     def readTurbineMap(self):
@@ -13,7 +13,8 @@ class WindGym(object):
 
         h_distance = 2
         v_distance = 0.75
-        turbine_grid = 500 * np.array([[h_distance,  0],
+        self.turbineNum = 7
+        self.turbineGrid = 500 * np.array([[h_distance,  0],
                                        [0, 2*v_distance],
                                        [h_distance, 3*v_distance],
                                        [0, 5*v_distance],
@@ -24,7 +25,6 @@ class WindGym(object):
                                        [1+h_distance, 3*v_distance],
                                        [1+h_distance, 6*v_distance],
                                        [1+h_distance, 9*v_distance]])
-        return turbine_grid
 
     def buildActionSpace(self):
         self.yaw_range1 = np.array([23, 27, 28])
@@ -35,31 +35,32 @@ class WindGym(object):
     def reset(self):
         return
 
-    def step(self):
+    def step(self, action):
         # TODO: read from csv
 
-        simulator.randomizeWind()
+        (y1, y2, y3, y4, y5, y6, y7) = action
+        self.simulator.randomizeWind()
         yaws = np.array([
-            yaw_range1[y1],
-            yaw_range2[y2],
-            yaw_range1[y3],
-            yaw_range2[y4],
-            yaw_range1[y5],
-            yaw_range3[y6],
-            yaw_range1[y7],
+            self.yaw_range1[y1],
+            self.yaw_range2[y2],
+            self.yaw_range1[y3],
+            self.yaw_range2[y4],
+            self.yaw_range1[y5],
+            self.yaw_range3[y6],
+            self.yaw_range1[y7],
             0,
             0,
             0,
             0
         ])
-        q = simulator.run(yaws)
+        q = self.simulator.run(yaws)
 
         # [nDirections, nTurbines]
-        self.velocitiesTurbines_directions = simulator.get("velocitiesTurbines_directions")
+        self.velocitiesTurbines_directions = self.simulator.get("velocitiesTurbines_directions")
         # [nDirections, nTurbines]
-        self.wt_power_directions = simulator.get("wt_power_directions")
+        self.wt_power_directions = self.simulator.get("wt_power_directions")
         # [nDirections]
-        self.power_directions = simulator.get("power_directions")
+        self.power_directions = self.simulator.get("power_directions")
 
         pp = np.copy(q[0:7])
         pp[0] += q[7]
