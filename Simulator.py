@@ -56,11 +56,11 @@ class WindGym(object):
         q = self.simulator.run(yaws)
 
         # [nDirections, nTurbines]
-        self.velocitiesTurbines_directions = self.simulator.get("velocitiesTurbines_directions")
+        self.velocitiesTurbines_directions = self.simulator['velocitiesTurbines_directions']
         # [nDirections, nTurbines]
-        self.wt_power_directions = self.simulator.get("wt_power_directions")
+        self.wt_power_directions = self.simulator['wt_power_directions']
         # [nDirections]
-        self.power_directions = self.simulator.get("power_directions")
+        self.power_directions = self.simulator['power_directions']
 
         pp = np.copy(q[0:7])
         pp[0] += q[7]

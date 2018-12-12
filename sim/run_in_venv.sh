@@ -2,6 +2,6 @@
 set -e
 
 cd "$(dirname "$0")"
-source ./bin/activate
+source ./openmdao-0.13.0/bin/activate
 
 exec "$@"

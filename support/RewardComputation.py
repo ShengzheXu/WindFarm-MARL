@@ -1,0 +1,2 @@
+class RewardComputation(object):
+    pass
