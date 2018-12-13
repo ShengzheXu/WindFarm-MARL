@@ -21,7 +21,8 @@ rewardComputer = RewardComputation()
 for eps in range(0, episode):
     simm.__init__()
     for timeI in range(0, simTime):
-        # where is the filter for state, in simulator or in AgentWrapper?
+        # Q: where is the filter for state, in simulator or in AgentWrapper?
+        # A: query to the simmulator
         state = simm.makeState()
 
         # envInfo includes wind and turbine position
