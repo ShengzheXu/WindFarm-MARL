@@ -1,22 +1,15 @@
-from openmdao.main.api import Assembly
 from openmdao.lib.datatypes.api import Array, Bool, Float, VarTree
 from openmdao.lib.drivers.api import FixedPointIterator, SLSQPdriver
-from Parameters import FLORISParameters
+from openmdao.main.api import Assembly
 
-import numpy as np
-
-# ###########    imports for smooth model with analytic gradients    ##################################################
 from Analytic_components import AEP
 from Analytic_components import dist_const
-
-# ###########    imports from python model    #########################################
-from Circle_components import floris_windframe
-from Circle_components import floris_wcent_wdiam
 from Circle_components import floris_overlap
 from Circle_components import floris_power
-
-# ###########    imports for rotor modeling    ########################################################################
-from rotor_components import *
+from Circle_components import floris_wcent_wdiam
+from Circle_components import floris_windframe
+from Parameters import FLORISParameters
+from sim.rotor_components import *
 
 
 class floris_assembly_opt_AEP(Assembly):

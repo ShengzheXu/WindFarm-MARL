@@ -1,7 +1,7 @@
 ctraits.traits
 __newobj__
 p1
-(crotor_components
+(csim.rotor_components
 windSpeedToCPCT
 p2
 tRp3

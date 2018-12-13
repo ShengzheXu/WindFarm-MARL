@@ -25,7 +25,7 @@ class FlorisWrapper:
 
     def __init__(self, turbine_positions, wind_angle=0., wind_speed=8.1):
         n_turbines = turbine_positions.shape[0]
-        nrel_prop = pickle.load(open('NREL5MWCPCT.p'))
+        nrel_prop = pickle.load(open('sim/NREL5MWCPCT.p'))
         floris = floris_assembly_opt_AEP(nTurbines=n_turbines, nDirections=1, datasize=nrel_prop.CP.size)
         floris.parameters = FLORISParameters()  # use default FLORIS parameters
 
