@@ -9,7 +9,7 @@ from Circle_components import floris_power
 from Circle_components import floris_wcent_wdiam
 from Circle_components import floris_windframe
 from Parameters import FLORISParameters
-from sim.rotor_components import *
+from rotor_components import *
 
 
 class floris_assembly_opt_AEP(Assembly):
