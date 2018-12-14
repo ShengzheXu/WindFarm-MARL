@@ -3,9 +3,11 @@ import numpy as np
 
 class WindGym(object):
 
-    def __init__(self):
+    def __init__(self, turbineNum):
         self.readTurbineMap()
+        self.turbineNum = turbineNum
         self.simulator = FlorisWrapper(self.turbineGrid)
+        self.simulator.floris.configure()
         self.buildActionSpace()
 
     def readTurbineMap(self):
@@ -32,28 +34,36 @@ class WindGym(object):
         self.yaw_range3 = np.array([-2, 1, 4])
         self.yaw_range4 = np.array([0])
 
-    def reset(self):
-        return
-
-    def step(self, action):
-        # TODO: read from csv
-
-        (y1, y2, y3, y4, y5, y6, y7) = action
-        self.simulator.randomizeWind()
-        yaws = np.array([
-            self.yaw_range1[y1],
-            self.yaw_range2[y2],
-            self.yaw_range1[y3],
-            self.yaw_range2[y4],
-            self.yaw_range1[y5],
-            self.yaw_range3[y6],
-            self.yaw_range1[y7],
+        self.currentAngle = []
+        for i in range(0, self.turbineNum):
+            self.currentAngle.append(0)
+        self.yaws = np.array([
+            self.yaw_range1[self.currentAngle[0]],
+            self.yaw_range2[self.currentAngle[1]],
+            self.yaw_range1[self.currentAngle[2]],
+            self.yaw_range2[self.currentAngle[3]],
+            self.yaw_range1[self.currentAngle[4]],
+            self.yaw_range3[self.currentAngle[5]],
+            self.yaw_range1[self.currentAngle[6]],
             0,
             0,
             0,
             0
         ])
-        q = self.simulator.run(yaws)
+
+
+    def reset(self):
+        return
+
+    def step(self):
+        # TODO: read from csv
+        self.simulator.randomizeWind()
+
+    def miniStep(self, turbineId, action):
+        # todo modify the angle based on the action space
+        # self.yaws[turbineId] = action
+        print(self.yaws)
+        q = self.simulator.run(self.yaws)
 
         # [nDirections, nTurbines]
         self.velocitiesTurbines_directions = self.simulator['velocitiesTurbines_directions']
@@ -67,8 +77,12 @@ class WindGym(object):
         pp[2] += q[8]
         pp[4] += q[9]
         pp[6] += q[10]
-
+        print(pp.tolist())
         return pp.tolist()
 
-    def makeState(self):
+
+    def makeState(self, turbineId):
         return
+
+    def makeEnvInfo(self):
+        return []

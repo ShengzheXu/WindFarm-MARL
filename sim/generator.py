@@ -188,6 +188,7 @@ def test():
                                    yaw_range1,
                                    yaw_range4, yaw_range4, yaw_range4, yaw_range4):
         yaws = np.array(list(yyaws))
+        print("try", yaws)
         powers = simulator.run(yaws)
         pp = np.copy(powers[0:7])
         pp[0] += powers[7]
