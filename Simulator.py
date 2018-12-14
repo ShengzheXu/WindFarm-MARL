@@ -7,7 +7,7 @@ class WindGym(object):
         self.readTurbineMap()
         self.turbineNum = turbineNum
         self.simulator = FlorisWrapper(self.turbineGrid)
-        self.simulator.floris.configure()
+        # self.simulator.floris.configure()
         self.buildActionSpace()
 
     def readTurbineMap(self):
@@ -61,16 +61,16 @@ class WindGym(object):
 
     def miniStep(self, turbineId, action):
         # todo modify the angle based on the action space
-        # self.yaws[turbineId] = action
+        self.yaws[turbineId] = action
         print(self.yaws)
         q = self.simulator.run(self.yaws)
 
         # [nDirections, nTurbines]
-        self.velocitiesTurbines_directions = self.simulator['velocitiesTurbines_directions']
+        self.velocitiesTurbines_directions = self.simulator.floris.velocitiesTurbines_directions
         # [nDirections, nTurbines]
-        self.wt_power_directions = self.simulator['wt_power_directions']
+        self.wt_power_directions = self.simulator.floris.wt_power_directions
         # [nDirections]
-        self.power_directions = self.simulator['power_directions']
+        self.power_directions = self.simulator.floris.power_directions
 
         pp = np.copy(q[0:7])
         pp[0] += q[7]

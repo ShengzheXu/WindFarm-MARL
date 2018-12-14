@@ -9,4 +9,5 @@ class RandomAgent(AbstractAgent):
     def doForward(self, state):
         # generate action from 0 to 360 degree
         actionDegree = random.randint(0,361)
+        print(actionDegree)
         return actionDegree

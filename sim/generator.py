@@ -196,6 +196,7 @@ def test():
         pp[4] += powers[9]
         pp[6] += powers[10]
         power = sum(powers)
+        print(powers)
         if power > best_power:
             best_power, best_yaws = power, yaws
         if power < min_power:
