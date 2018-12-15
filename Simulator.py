@@ -9,6 +9,10 @@ class WindGym(object):
         self.simulator = FlorisWrapper(self.turbineGrid)
         # self.simulator.floris.configure()
         self.buildActionSpace()
+        self.episode = 0
+        self.stepCnt = 0
+        self.epsTotalPower = 0
+        self.epsTotalPowerRecord = []
 
     def readTurbineMap(self):
         # TODO: read from csv
@@ -32,11 +36,14 @@ class WindGym(object):
         self.yaw_range1 = np.array([23, 27, 28])
         self.yaw_range2 = np.array([-10, -6, -1])
         self.yaw_range3 = np.array([-2, 1, 4])
-        self.yaw_range4 = np.array([0])
+        self.yaw_range4 = np.array([0, 0, 0])
 
         self.currentAngle = []
         for i in range(0, self.turbineNum):
             self.currentAngle.append(0)
+        self.makeAction()
+
+    def makeAction(self):
         self.yaws = np.array([
             self.yaw_range1[self.currentAngle[0]],
             self.yaw_range2[self.currentAngle[1]],
@@ -53,16 +60,23 @@ class WindGym(object):
 
 
     def reset(self):
+        self.stepCnt = 0
+        self.episode += 1
+        self.epsTotalPowerRecord.append(self.epsTotalPower)
+        self.epsTotalPower = 0
         return
 
     def step(self):
         # TODO: read from csv
+        self.stepCnt += 1
         self.simulator.randomizeWind()
+        print(self.episode, self.stepCnt, self.simulator.floris.windrose_speeds)
 
     def miniStep(self, turbineId, action):
         # todo modify the angle based on the action space
-        self.yaws[turbineId] = action
-        print(self.yaws)
+        self.currentAngle[turbineId] = action
+        self.makeAction()
+        # print(self.yaws)
         q = self.simulator.run(self.yaws)
 
         # [nDirections, nTurbines]
@@ -77,7 +91,8 @@ class WindGym(object):
         pp[2] += q[8]
         pp[4] += q[9]
         pp[6] += q[10]
-        print(pp.tolist())
+        # print(self.episode, self.stepCnt, turbineId, action, sum(pp.tolist()), pp.tolist())
+        self.epsTotalPower += sum(pp.tolist())
         return pp.tolist()
 
 

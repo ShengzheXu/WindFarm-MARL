@@ -47,6 +47,7 @@ class FlorisWrapper:
         floris.turbineX, floris.turbineY = np.array(list(zip(*turbine_positions)))
 
         self.floris = floris
+        np.random.seed(233423)
         self.randomizeWind()
 
     def randomizeWind(self):
@@ -58,6 +59,7 @@ class FlorisWrapper:
 
         self.floris.windrose_speeds = min(self.floris.windrose_speeds, ub)
         self.floris.windrose_speeds = max(self.floris.windrose_speeds, lb)
+        #return self.floris.windrose_speeds
         #self.floris.windrose_speeds = self.wind_speed
 
     def run(self, yaws):

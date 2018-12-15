@@ -4,8 +4,9 @@ from support.GraphComputation import GraphComputation
 from support.RewardComputation import RewardWrapper
 
 # todo read exp runner setting from config file
-episode = 10
-simTime = 10
+episode = 5
+# the data we're going to use is hourly
+simTime = 5 * 24
 turbineNum = 11
 
 simm = WindGym(turbineNum=turbineNum)
@@ -20,7 +21,6 @@ rewardComputer.makeExpPools(agentNum=turbineNum)
 
 
 for eps in range(0, episode):
-    simm.reset()
     for timeI in range(0, simTime):
         simm.step()
 
@@ -43,4 +43,6 @@ for eps in range(0, episode):
             # state_ = simm.makeState()
             # rewardComputer.store(turbineId, state, action, reward, state_)
 
+    simm.reset()
 
+print(simm.epsTotalPowerRecord)
