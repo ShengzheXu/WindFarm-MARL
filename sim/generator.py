@@ -48,7 +48,7 @@ class FlorisWrapper:
 
         self.floris = floris
         np.random.seed(233423)
-        self.randomizeWind()
+        # self.randomizeWind()
 
     def randomizeWind(self):
         diff = 0.005

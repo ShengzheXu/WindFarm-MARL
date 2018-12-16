@@ -97,6 +97,7 @@ class WindGym(object):
 
 
     def makeState(self, turbineId):
+        # print("direction:", self.simulator.floris.floris_power_0.  #velocitiesTurbines_directions)
         return
 
     def makeEnvInfo(self):
