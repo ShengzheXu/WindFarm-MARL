@@ -12,7 +12,9 @@ class WindGym(object):
         self.episode = 0
         self.stepCnt = 0
         self.epsTotalPower = 0
+        self.epsCount = 0
         self.epsTotalPowerRecord = []
+        self.epsEachCount = 0
 
     def readTurbineMap(self):
         # TODO: read from csv
@@ -64,13 +66,15 @@ class WindGym(object):
         self.episode += 1
         self.epsTotalPowerRecord.append(self.epsTotalPower)
         self.epsTotalPower = 0
+        self.epsEachCount = self.epsCount
+        self.epsCount = 0
         return
 
     def step(self):
         # TODO: read from csv
         self.stepCnt += 1
         self.simulator.randomizeWind()
-        print(self.episode, self.stepCnt, self.simulator.floris.windrose_speeds)
+        # print(self.episode, self.stepCnt, self.simulator.floris.windrose_speeds)
 
     def miniStep(self, turbineId, action):
         # todo modify the angle based on the action space
@@ -78,7 +82,9 @@ class WindGym(object):
         self.makeAction()
         # print(self.yaws)
         q = self.simulator.run(self.yaws)
-
+        # print(self.simulator.floris.ws_array_0)
+        # print(self.simulator.floris.floris_windframe_0.turbineX)
+        print(self.simulator.floris.velocitiesTurbines_directions)
         # [nDirections, nTurbines]
         self.velocitiesTurbines_directions = self.simulator.floris.velocitiesTurbines_directions
         # [nDirections, nTurbines]
@@ -93,6 +99,7 @@ class WindGym(object):
         pp[6] += q[10]
         # print(self.episode, self.stepCnt, turbineId, action, sum(pp.tolist()), pp.tolist())
         self.epsTotalPower += sum(pp.tolist())
+        self.epsCount += 1
         return pp.tolist()
 
 

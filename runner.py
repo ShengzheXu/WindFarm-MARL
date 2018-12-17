@@ -2,6 +2,7 @@ from Simulator import WindGym
 from agent.AgentWrapper import AgentWrapper
 from support.GraphComputation import GraphComputation
 from support.RewardComputation import RewardWrapper
+from datetime import datetime
 
 # todo read exp runner setting from config file
 episode = 5
@@ -19,6 +20,7 @@ graphComputer = GraphComputation()
 rewardComputer = RewardWrapper()
 rewardComputer.makeExpPools(agentNum=turbineNum)
 
+starttime = datetime.now()
 
 for eps in range(0, episode):
     for timeI in range(0, simTime):
@@ -45,4 +47,10 @@ for eps in range(0, episode):
 
     simm.reset()
 
+endtime = datetime.now()
+
+
+print('total time', (endtime-starttime).seconds)
 print(simm.epsTotalPowerRecord)
+print(sum(simm.epsTotalPowerRecord)/5)
+print(simm.epsEachCount)
