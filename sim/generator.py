@@ -26,15 +26,15 @@ class FlorisWrapper:
     def __init__(self, turbine_positions, wind_angle=0., wind_speed=8.1):
         n_turbines = turbine_positions.shape[0]
         nrel_prop = pickle.load(open('sim/NREL5MWCPCT.p'))
-        floris = floris_assembly_opt_AEP(nTurbines=n_turbines, nDirections=3, nSamples=11, optimize_yaw=False, datasize=nrel_prop.CP.size)
+        floris = floris_assembly_opt_AEP(nTurbines=n_turbines, nDirections=1, nSamples=11, optimize_yaw=False, datasize=nrel_prop.CP.size)
         floris.parameters = FLORISParameters()  # use default FLORIS parameters
 
         # Define site measurements
-        #floris.windrose_directions = wind_angle * np.ones(1)  # incoming wind direction (deg)
-        wind_list = [0, 90, 180]
-        floris.windrose_directions = np.array(wind_list)
-        #self.wind_speed = wind_speed # incoming wind speed (m/s)
-        self.wind_speed = [wind_speed, 0, 0]  # incoming wind speed (m/s)
+        floris.windrose_directions = wind_angle * np.ones(1)  # incoming wind direction (deg)
+        # wind_list = [0, 90, 180]
+        # floris.windrose_directions = np.array(wind_list)
+        self.wind_speed = wind_speed # incoming wind speed (m/s)
+        # self.wind_speed = [wind_speed, 1, 1]  # incoming wind speed (m/s)
         floris.air_density = 1.1716
         floris.initVelocitiesTurbines = np.ones_like(floris.windrose_directions)*floris.windrose_speeds
 
@@ -55,18 +55,19 @@ class FlorisWrapper:
 
     def randomizeWind(self):
         diff = 0.005
-        mid = self.wind_speed[0] - diff
+        mid = self.wind_speed - diff
+        # mid = self.wind_speed[0] - diff
         ub = mid + diff
         lb = mid - diff
         ws = scipy.stats.norm.rvs(mid, diff, size=1)[0]
         ws = min(ws, ub)
         ws = max(ws, lb)
 
-        # self.floris.windrose_speeds = scipy.stats.norm.rvs(mid, diff, size=1)[0]
+        self.floris.windrose_speeds = scipy.stats.norm.rvs(mid, diff, size=1)[0]
 
-        # self.floris.windrose_speeds = min(self.floris.windrose_speeds, ub)
-        # self.floris.windrose_speeds = max(self.floris.windrose_speeds, lb)
-        self.floris.windrose_speeds = [ws, 0, 0]
+        self.floris.windrose_speeds = min(self.floris.windrose_speeds, ub)
+        self.floris.windrose_speeds = max(self.floris.windrose_speeds, lb)
+        # self.floris.windrose_speeds = [ws, 0, 0]
         #return self.floris.windrose_speeds
         #self.floris.windrose_speeds = self.wind_speed
 

@@ -1,4 +1,5 @@
 from RandomAgent import RandomAgent
+from GreedyAgent import GreedyAgent
 
 class AgentWrapper(object):
     def __init__(self):
@@ -7,8 +8,10 @@ class AgentWrapper(object):
     def makeAgents(self, agentNum, type):
         self.__init__()
         for i in range(agentNum):
-            # if (type == 'random'):
-            nextAgent = RandomAgent()
+            if (type == 'random'):
+                nextAgent = RandomAgent()
+            else:
+                nextAgent = GreedyAgent()
             self.models.append(nextAgent)
 
     def doForward(self, agentId, state):

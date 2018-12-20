@@ -5,15 +5,17 @@ from support.RewardComputation import RewardWrapper
 from datetime import datetime
 
 # todo read exp runner setting from config file
-episode = 5
+episode = 1
 # the data we're going to use is hourly
 simTime = 5 * 24
 turbineNum = 11
 
-simm = WindGym(turbineNum=turbineNum)
+# simm = WindGym(turbineNum=turbineNum)
+simm = WindGym(turbineNum=turbineNum, greedy="greedy")
 
 agentWrapper = AgentWrapper()
-agentWrapper.makeAgents(agentNum=turbineNum, type="random")
+# agentWrapper.makeAgents(agentNum=turbineNum, type="random")
+agentWrapper.makeAgents(agentNum=turbineNum, type="greedy")
 
 # how to make these names?
 graphComputer = GraphComputation()

@@ -7,5 +7,4 @@ class GreedyAgent(AbstractAgent):
         pass
 
     def doForward(self, envInfo):
-
-        return actionDegree
+        return 0

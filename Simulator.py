@@ -3,12 +3,12 @@ import numpy as np
 
 class WindGym(object):
 
-    def __init__(self, turbineNum):
+    def __init__(self, turbineNum, greedy=None):
         self.readTurbineMap()
         self.turbineNum = turbineNum
         self.simulator = FlorisWrapper(self.turbineGrid)
         # self.simulator.floris.configure()
-        self.buildActionSpace()
+        self.buildActionSpace(greedy)
         self.episode = 0
         self.stepCnt = 0
         self.epsTotalPower = 0
@@ -34,11 +34,18 @@ class WindGym(object):
                                        [1+h_distance, 6*v_distance],
                                        [1+h_distance, 9*v_distance]])
 
-    def buildActionSpace(self):
+    def buildActionSpace(self, greedy=None):
         self.yaw_range1 = np.array([23, 27, 28])
         self.yaw_range2 = np.array([-10, -6, -1])
         self.yaw_range3 = np.array([-2, 1, 4])
         self.yaw_range4 = np.array([0, 0, 0])
+        if (greedy is not None):
+            # best_yaws          = np.array([27, -1, 27, -1, 27,  1, 27,  0,  0,  0,  0])
+            self.yaw_range1 = np.array([27])
+            self.yaw_range2 = np.array([-1])
+            self.yaw_range3 = np.array([1])
+            self.yaw_range4 = np.array([0])
+
 
         self.currentAngle = []
         for i in range(0, self.turbineNum):
@@ -84,7 +91,8 @@ class WindGym(object):
         q = self.simulator.run(self.yaws)
         # print(self.simulator.floris.ws_array_0)
         # print(self.simulator.floris.floris_windframe_0.turbineX)
-        print(self.simulator.floris.velocitiesTurbines_directions)
+        # print(self.simulator.floris.velocitiesTurbines_directions)
+        # print(self.simulator.floris.floris_power_0.velocitiesTurbines)
         # [nDirections, nTurbines]
         self.velocitiesTurbines_directions = self.simulator.floris.velocitiesTurbines_directions
         # [nDirections, nTurbines]
@@ -99,6 +107,7 @@ class WindGym(object):
         pp[6] += q[10]
         # print(self.episode, self.stepCnt, turbineId, action, sum(pp.tolist()), pp.tolist())
         self.epsTotalPower += sum(pp.tolist())
+        # self.epsTotalPower += pp[1] + pp[3] + pp[5]
         self.epsCount += 1
         return pp.tolist()
 

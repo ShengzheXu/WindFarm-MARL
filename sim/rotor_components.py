@@ -116,5 +116,8 @@ class CPCT_Interpolate(Component):
         dCP = np.hstack((dCP_dyaw, dCP_dwind))
         dCT = np.hstack((dCT_dyaw, dCT_dwind))
         J = np.vstack((dCP, dCT))
+        # print dCP
+        # print dCT
+        # print J
 
         return J
