@@ -1,5 +1,6 @@
 from RandomAgent import RandomAgent
 from GreedyAgent import GreedyAgent
+from DqnAgent import DqnAgent
 
 class AgentWrapper(object):
     def __init__(self):
@@ -10,6 +11,8 @@ class AgentWrapper(object):
         for i in range(agentNum):
             if (type == 'random'):
                 nextAgent = RandomAgent()
+            elif (type == 'dqn'):
+                nextAgent = DqnAgent(i)
             else:
                 nextAgent = GreedyAgent()
             self.models.append(nextAgent)
@@ -17,3 +20,6 @@ class AgentWrapper(object):
     def doForward(self, agentId, state):
         action = self.models[agentId].doForward(state)
         return action
+
+    def doBackward(self, agentId, exp):
+        self.models[agentId].doBackward(exp)

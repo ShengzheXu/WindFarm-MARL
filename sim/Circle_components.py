@@ -369,6 +369,7 @@ class floris_power(Component):
     def execute(self):
 
         turbineXw = self.turbineXw
+        # print turbineXw
         nTurbines = turbineXw.size
 
         # wakeOverlapTRel = self.wakeOverlapTRel
@@ -473,7 +474,7 @@ class floris_power(Component):
                 else:
                     reductionFactor = 0
                 self.ws_array[loc] *= (1-reductionFactor)
-        #print 'ws_array in floris_power is: ', self.ws_array
+        # print 'ws_array in floris_power is: ', self.ws_array
         # find effective wind speeds at downstream turbines, then predict power downstream turbine
         self.velocitiesTurbines = np.tile(Vinf, nTurbines)
 
