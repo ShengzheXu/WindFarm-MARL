@@ -3,13 +3,12 @@ from RL_brain import DoubleDQN
 import tensorflow as tf
 
 class DqnAgent(AbstractAgent):
-    def __init__(self, turbineId):
+    def __init__(self, turbineId, sess):
         self.istrain = False
         self.ACTION_SPACE = 3
         self.MEMORY_SIZE = 50000
-        self.sess = tf.Session()
+        self.sess = sess
         self.initOneAgent(turbineId, allfeature_len=7)
-
         pass
 
     def initOneAgent(self, who, allfeature_len):

@@ -53,32 +53,32 @@ class WindGym(object):
         self.makeAction()
 
     def makeAction(self):
-        # self.yaws = np.array([
-        #     self.yaw_range1[self.currentAngle[0]],
-        #     self.yaw_range2[self.currentAngle[1]],
-        #     self.yaw_range1[self.currentAngle[2]],
-        #     self.yaw_range2[self.currentAngle[3]],
-        #     self.yaw_range1[self.currentAngle[4]],
-        #     self.yaw_range3[self.currentAngle[5]],
-        #     self.yaw_range1[self.currentAngle[6]],
-        #     0,
-        #     0,
-        #     0,
-        #     0
-        # ])
         self.yaws = np.array([
             self.yaw_range1[self.currentAngle[0]],
-            0,
+            self.yaw_range2[self.currentAngle[1]],
             self.yaw_range1[self.currentAngle[2]],
-            30,
+            self.yaw_range2[self.currentAngle[3]],
             self.yaw_range1[self.currentAngle[4]],
-            -30,
+            self.yaw_range3[self.currentAngle[5]],
             self.yaw_range1[self.currentAngle[6]],
             0,
             0,
             0,
             0
         ])
+        # self.yaws = np.array([
+        #     self.yaw_range1[self.currentAngle[0]],
+        #     0,
+        #     self.yaw_range1[self.currentAngle[2]],
+        #     30,
+        #     self.yaw_range1[self.currentAngle[4]],
+        #     -30,
+        #     self.yaw_range1[self.currentAngle[6]],
+        #     0,
+        #     0,
+        #     0,
+        #     0
+        # ])
 
 
     def reset(self):

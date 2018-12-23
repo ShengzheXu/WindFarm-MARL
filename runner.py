@@ -12,8 +12,8 @@ episode = 1
 simTime = 5 * 24
 turbineNum = 11
 
-# simm = WindGym(turbineNum=turbineNum)
-simm = WindGym(turbineNum=turbineNum, greedy="greedy")
+simm = WindGym(turbineNum=turbineNum)
+# simm = WindGym(turbineNum=turbineNum, greedy="greedy")
 
 agentWrapper = AgentWrapper()
 # agentWrapper.makeAgents(agentNum=turbineNum, type="random")

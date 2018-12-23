@@ -10,7 +10,7 @@ class Experience(object):
         self.exp[turbineId].append(item)
 
     def sup(self, turbineId, s_):
-        if len(self.exp[turbineId] > 0):
+        if len(self.exp[turbineId]) > 0:
             item = self.exp[turbineId][-1]
             (s, a, r) = item
             item_ = (s, a, r, s_)
