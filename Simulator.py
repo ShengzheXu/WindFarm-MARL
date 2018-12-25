@@ -35,10 +35,12 @@ class WindGym(object):
                                        [1+h_distance, 9*v_distance]])
 
     def buildActionSpace(self, greedy=None):
-        self.yaw_range1 = np.array([23, 27, 28])
-        self.yaw_range2 = np.array([-10, -6, -1])
-        self.yaw_range3 = np.array([-2, 1, 4])
-        self.yaw_range4 = np.array([0, 0, 0])
+        self.yaw_range5 = np.array([-30, -20, -10, -5, -1, 0, 1, 5, 10, 20, 30])
+
+        # self.yaw_range1 = np.array([23, 27, 28])
+        # self.yaw_range2 = np.array([-10, -6, -1])
+        # self.yaw_range3 = np.array([-2, 1, 4])
+        # self.yaw_range4 = np.array([0, 0, 0])
         if (greedy is not None):
             # best_yaws          = np.array([27, -1, 27, -1, 27,  1, 27,  0,  0,  0,  0])
             self.yaw_range1 = np.array([27])
@@ -49,18 +51,18 @@ class WindGym(object):
 
         self.currentAngle = []
         for i in range(0, self.turbineNum):
-            self.currentAngle.append(0)
+            self.currentAngle.append(5)
         self.makeAction()
 
     def makeAction(self):
         self.yaws = np.array([
-            self.yaw_range1[self.currentAngle[0]],
-            self.yaw_range2[self.currentAngle[1]],
-            self.yaw_range1[self.currentAngle[2]],
-            self.yaw_range2[self.currentAngle[3]],
-            self.yaw_range1[self.currentAngle[4]],
-            self.yaw_range3[self.currentAngle[5]],
-            self.yaw_range1[self.currentAngle[6]],
+            self.yaw_range5[self.currentAngle[0]],
+            self.yaw_range5[self.currentAngle[1]],
+            self.yaw_range5[self.currentAngle[2]],
+            self.yaw_range5[self.currentAngle[3]],
+            self.yaw_range5[self.currentAngle[4]],
+            self.yaw_range5[self.currentAngle[5]],
+            self.yaw_range5[self.currentAngle[6]],
             0,
             0,
             0,
@@ -101,7 +103,18 @@ class WindGym(object):
         self.currentAngle[turbineId] = action
         self.makeAction()
         # print(self.yaws)
-        q = self.simulator.run(self.yaws)
+
+        # set downsteam turbines to be greedy
+        influenceYaws = np.copy(self.yaws)
+        partialRange = self.getRange(turbineId)
+        # print turbineId, partialRange
+        for i in partialRange:
+            influenceYaws[i] = 0
+
+        q = np.copy(self.simulator.run(influenceYaws))
+        influenceYaws[turbineId] = 0
+        q_ = np.copy(self.simulator.run(influenceYaws))
+
         # print(self.simulator.floris.ws_array_0)
         # print(self.simulator.floris.floris_windframe_0.turbineX)
         # print(self.simulator.floris.velocitiesTurbines_directions)
@@ -113,29 +126,56 @@ class WindGym(object):
         # [nDirections]
         # self.power_directions = self.simulator.floris.power_directions
 
-        pp = np.copy(q[0:7])
-        pp[0] += q[7]
-        pp[2] += q[8]
-        pp[4] += q[9]
-        pp[6] += q[10]
+        # pp = np.copy(q[0:7])
+        # pp[0] += q[7]
+        # pp[2] += q[8]
+        # pp[4] += q[9]
+        # pp[6] += q[10]
         # print(self.episode, self.stepCnt, turbineId, action, sum(pp.tolist()), pp.tolist())
         # print("power of 135: ", pp[1], pp[3], pp[5])
-        self.epsTotalPower += sum(pp.tolist())
+        self.epsTotalPower += sum(q.tolist())
         # self.epsTotalPower += pp[1] + pp[3] + pp[5]
         self.epsCount += 1
-        # self.getRange(turbineId)
-        return sum(pp.tolist())
 
+        penalty = q[turbineId] - q_[turbineId]
+        award = 0
+        for i in partialRange:
+            award += q[i] - q_[i]
+
+        # todo make log here
+        # print turbineId, "penaltyaward", penalty, award, "from", partialRange
+
+        partialReward = award - penalty
+        # return sum(pp.tolist())
+        return partialReward
 
     def makeState(self, turbineId):
-        # print("direction:", self.simulator.floris.floris_power_0.  #velocitiesTurbines_directions)
+        # print("direction:", self.simulator.floris.floris_power_0.yaw)  #velocitiesTurbines_directions)
         stateRst = []
+        # 2+4+4*5 = 27
+
+        # 2 features for main wind info [direction, speed]
+        stateRst.append(self.simulator.wind_angle)
+        stateRst.append(self.simulator.wind_speed)
+
+        # 4 features for this turbine info [cur_yaw, speed, wind_frame_x, wind_frame_y]
+        stateRst.append(self.yaws[turbineId])
         stateRst.append(self.simulator.floris.floris_power_0.velocitiesTurbines[turbineId])
+        stateRst.append(self.turbineXw[turbineId])
+        stateRst.append(self.turbineYw[turbineId])
+
         effRange = self.getRange(turbineId)
         for i in effRange:
+            stateRst.append(self.yaws[i])
             stateRst.append(self.simulator.floris.floris_power_0.velocitiesTurbines[i])
-        for j in range(len(effRange), 6):
+            stateRst.append(self.turbineXw[i])
+            stateRst.append(self.turbineYw[i])
+
+        while len(stateRst) < 27:
             stateRst.append(0)
+        # for j in range(len(effRange), 5):
+        #     for kk in range(5):
+        #         stateRst.append(0)
         # print "state", stateRst
         return stateRst
 
@@ -160,7 +200,7 @@ class WindGym(object):
         self.indexOrder = index_order
         self.turbineXw = xw
         self.turbineYw = yw
-        print index_order
+        # print index_order
 
     def getRange(self, turbinId):
         label = -1

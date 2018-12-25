@@ -1,14 +1,14 @@
 from AbstractAgent import AbstractAgent
-from RL_brain import DoubleDQN
+from RlBrain import DoubleDQN
 import tensorflow as tf
 
 class DqnAgent(AbstractAgent):
     def __init__(self, turbineId, sess):
         self.istrain = False
-        self.ACTION_SPACE = 3
+        self.ACTION_SPACE = 11
         self.MEMORY_SIZE = 50000
         self.sess = sess
-        self.initOneAgent(turbineId, allfeature_len=7)
+        self.initOneAgent(turbineId, allfeature_len=27)
         pass
 
     def initOneAgent(self, who, allfeature_len):
@@ -17,8 +17,8 @@ class DqnAgent(AbstractAgent):
             e_greedy_end = 0.99
             greedy_increment = (e_greedy_end - e_greedy_start) / self.train_episode
         else:
-            e_greedy_start = 1
-            e_greedy_end = 1
+            e_greedy_start = 0.7
+            e_greedy_end = 0.7
             greedy_increment = None
         with tf.variable_scope(str(who) + '_DDQN'):
             double_DQN = DoubleDQN(agent_name=str(who) + '_DDQN',
@@ -31,7 +31,7 @@ class DqnAgent(AbstractAgent):
 
 
     def doForward(self, state):
-        print (state)
+        # print (state)
         action_number = self.agent.choose_action(state)
         return action_number
 

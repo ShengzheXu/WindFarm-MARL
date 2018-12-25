@@ -5,9 +5,9 @@ from support.RewardComputation import RewardWrapper
 from datetime import datetime
 
 # todo read exp runner setting from config file
-from support.experience import Experience
+from support.Experience import Experience
 
-episode = 1
+episode = 10 * 5 * 6
 # the data we're going to use is hourly
 simTime = 5 * 24
 turbineNum = 11
@@ -28,10 +28,13 @@ rewardComputer.makeExpPools(agentNum=turbineNum)
 
 starttime = datetime.now()
 # miniaction = [0, 0,0,0,0,0,0,0,0,0,0]
+simm.getTurbineWYw()
 simm.miniStep(0, 0)
 
 
 for eps in range(0, episode):
+    epspw = 0
+    epscount = 0
     for timeI in range(0, simTime):
         simm.step()
 
@@ -52,11 +55,14 @@ for eps in range(0, episode):
             # Q: where to build reward and s'?
             # A: the S_ is the S next time
             reward = simm.miniStep(turbineId, action)
+            epspw += reward
+            epscount += 1.0
             agentExperience.sup(turbineId, state)
             agentExperience.add(turbineId, state, action, reward)
             # state_ = simm.makeState()
             # rewardComputer.store(turbineId, state, action, reward, state_)
 
+    print "eps", eps, ":", simm.epsTotalPower/epscount
     simm.reset()
     for i in range(turbineNum):
         exp = agentExperience.get(i)
@@ -67,5 +73,5 @@ endtime = datetime.now()
 
 print('total time', (endtime-starttime).seconds)
 print(simm.epsTotalPowerRecord)
-print(sum(simm.epsTotalPowerRecord)/5)
+print(sum(simm.epsTotalPowerRecord)/len(simm.epsTotalPowerRecord))
 print(simm.epsEachCount)

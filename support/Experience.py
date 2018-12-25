@@ -12,6 +12,7 @@ class Experience(object):
     def sup(self, turbineId, s_):
         if len(self.exp[turbineId]) > 0:
             item = self.exp[turbineId][-1]
+            # print item
             (s, a, r) = item
             item_ = (s, a, r, s_)
             self.exp[turbineId][-1] = item_
@@ -19,5 +20,5 @@ class Experience(object):
     def get(self, turbineId):
         aExp = self.exp[turbineId]
         if len(aExp[-1]) < 4:
-            aExp.pop()
+            aExp = aExp[:-1]
         return aExp

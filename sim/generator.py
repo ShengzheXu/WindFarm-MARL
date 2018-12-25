@@ -33,6 +33,7 @@ class FlorisWrapper:
         floris.windrose_directions = wind_angle * np.ones(1)  # incoming wind direction (deg)
         # wind_list = [0, 90, 180]
         # floris.windrose_directions = np.array(wind_list)
+        self.wind_angle = wind_angle
         self.wind_speed = wind_speed # incoming wind speed (m/s)
         # self.wind_speed = [wind_speed, 1, 1]  # incoming wind speed (m/s)
         floris.air_density = 1.1716

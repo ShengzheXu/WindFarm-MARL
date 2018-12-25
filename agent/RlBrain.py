@@ -95,9 +95,15 @@ class DoubleDQN:
             self.q_next = build_layers(self.s_, c_names, n_l1, w_initializer, b_initializer)
 
     def see(self, experience):
+        self.forgot()
         for item in experience:
             s, a, r, s_ = item
             self.store_transition(s, a, r, s_)
+
+    def forgot(self):
+        if not hasattr(self, 'memory_counter'):
+            self.memory_counter = 0
+        np.zeros((self.memory_size, self.n_features * 2 + 2))
 
     def store_transition(self, s, a, r, s_):
         if not hasattr(self, 'memory_counter'):
