@@ -1,9 +1,13 @@
+import logging
+
+
 class Experience(object):
     def __init__(self, agentNum):
         self.exp = []
         for i in range(agentNum):
             nextExp = []
             self.exp.append(nextExp)
+        logging.basicConfig(filename='exp_logger.log', level=logging.INFO)
 
     def add(self, turbineId, s, a, r):
         item = (s, a, r)
@@ -15,6 +19,9 @@ class Experience(object):
             # print item
             (s, a, r) = item
             item_ = (s, a, r, s_)
+            # print "logging"
+            logger = logging.getLogger("wind_logger")
+            logger.critical(str(item_))
             self.exp[turbineId][-1] = item_
 
     def get(self, turbineId):

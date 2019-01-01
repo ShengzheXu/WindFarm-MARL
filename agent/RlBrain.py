@@ -164,7 +164,14 @@ class DoubleDQN:
                                                 self.q_target: q_target})
         self.cost_his.append(self.cost)
 
-        self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
+        # self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
+
+        # non-linear increment
+        p_epsilon = 1 - self.epsilon
+        p_epsilon = 1 - (p_epsilon * self.epsilon_increment)
+        self.epsilon = p_epsilon if self.epsilon < self.epsilon_max else self.epsilon_max
+        # end
+
         self.learn_step_counter += 1
 
     # follows are implemented for batch bp

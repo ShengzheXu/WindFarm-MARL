@@ -4,18 +4,18 @@ import tensorflow as tf
 
 class DqnAgent(AbstractAgent):
     def __init__(self, turbineId, sess):
-        self.istrain = False
+        self.istrain = True
         self.ACTION_SPACE = 11
         self.MEMORY_SIZE = 50000
         self.sess = sess
-        self.initOneAgent(turbineId, allfeature_len=27)
-        pass
+        self.initOneAgent(turbineId, allfeature_len=26)
 
     def initOneAgent(self, who, allfeature_len):
         if self.istrain is True:
             e_greedy_start = 0.7
             e_greedy_end = 0.99
-            greedy_increment = (e_greedy_end - e_greedy_start) / self.train_episode
+            # greedy_increment = (e_greedy_end - e_greedy_start) / self.train_episode
+            greedy_increment = 0.99
         else:
             e_greedy_start = 0.7
             e_greedy_end = 0.7

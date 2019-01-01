@@ -1,10 +1,13 @@
+from datetime import datetime
+
 from sim.generator import FlorisWrapper
 import numpy as np
+import csv
 
 class WindGym(object):
 
-    def __init__(self, turbineNum, greedy=None):
-        self.readTurbineMap()
+    def __init__(self, turbineNum, greedy=None, csvRead=None):
+        self.readTurbineMap(csvRead)
         self.turbineNum = turbineNum
         self.simulator = FlorisWrapper(self.turbineGrid)
         self.simulator.floris.configure()
@@ -16,26 +19,76 @@ class WindGym(object):
         self.epsTotalPowerRecord = []
         self.epsEachCount = 0
 
-    def readTurbineMap(self):
+    def readTurbineMap(self, csvRead=None):
         # TODO: read from csv
+        if csvRead is not None:
+            file = 'data/mini30turbines.csv'
+            min_xlong = 0x3f3f3f3f
+            min_ylat = 0x3f3f3f3f
+            loglat = []
+            with open(file) as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
+                line_count = 0
+                for row in csv_reader:
+                    if line_count == 0:
+                        line_count += 1
+                        continue
+                    # print row[22]
+                    row_xlong = float(row[22])
+                    row_ylat = float(row[23])
+                    if row_xlong < min_xlong:
+                        min_xlong = row_xlong
+                    if row_ylat < min_ylat:
+                        min_ylat = row_ylat
+                    loglat.append((row_xlong, row_ylat))
 
-        h_distance = 2
-        v_distance = 0.75
-        self.turbineNum = 7
-        self.turbineGrid = 500 * np.array([[h_distance,  0],
-                                       [0, 2*v_distance],
-                                       [h_distance, 3*v_distance],
-                                       [0, 5*v_distance],
-                                       [h_distance, 6*v_distance],
-                                       [0, 7*v_distance],
-                                       [h_distance, 9*v_distance],
-                                       [1+h_distance, 0],
-                                       [1+h_distance, 3*v_distance],
-                                       [1+h_distance, 6*v_distance],
-                                       [1+h_distance, 9*v_distance]])
+                    if line_count == 0:
+                        # print(f'Column names are {", ".join(row)}')
+                        # line_count += 1
+                        pass
+                    else:
+                        # print(f'\tx{row[22] and y{row[23]}')
+                        # print(f'\t{row[0]} works in the {row[1]} department, and was born in {row[2]}.')
+                        line_count += 1
+                # print(f'Processed {line_count} lines.')
+            posList = []
+            for gis in loglat:
+                (row_xlong, row_ylat) = gis
+                h_distance = (row_xlong-min_xlong) * 110
+                v_distance = (row_ylat-min_ylat) * 85
+                posList.append([h_distance, v_distance])
+            self.turbineNum = line_count-1
+            self.turbineGrid = 1000 * np.array(posList)
+            # for item in self.turbineGrid:
+            #     (x, y) = item
+            #     print x, ",", y
+            # print self.turbineGrid
+
+        else:
+            h_distance = 2
+            v_distance = 0.75
+            self.turbineNum = 7
+            self.turbineGrid = 500 * np.array([[h_distance,  0],
+                                           [0, 2*v_distance],
+                                           [h_distance, 3*v_distance],
+                                           [0, 5*v_distance],
+                                           [h_distance, 6*v_distance],
+                                           [0, 7*v_distance],
+                                           [h_distance, 9*v_distance],
+                                           [1+h_distance, 0],
+                                           [1+h_distance, 3*v_distance],
+                                           [1+h_distance, 6*v_distance],
+                                           [1+h_distance, 9*v_distance]])
+            for item in self.turbineGrid:
+                (x, y) = item
+                print x, ",", y
+            # print self.turbineGrid
 
     def buildActionSpace(self, greedy=None):
-        self.yaw_range5 = np.array([-30, -20, -10, -5, -1, 0, 1, 5, 10, 20, 30])
+        # self.yaw_range5 = np.array([-20, -10, -5, -1, 0, 1, 5, 10, 23, 27, 28])
+        self.yaw_range6 = np.array([-30, -28, -26, -24, -22, -20, -18, -16, -14, -12,
+                                    -10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10,
+                                    12, 14, 16, 18, 20, 22, 24, 26, 28, 30])
 
         # self.yaw_range1 = np.array([23, 27, 28])
         # self.yaw_range2 = np.array([-10, -6, -1])
@@ -55,27 +108,19 @@ class WindGym(object):
         self.makeAction()
 
     def makeAction(self):
-        self.yaws = np.array([
-            self.yaw_range5[self.currentAngle[0]],
-            self.yaw_range5[self.currentAngle[1]],
-            self.yaw_range5[self.currentAngle[2]],
-            self.yaw_range5[self.currentAngle[3]],
-            self.yaw_range5[self.currentAngle[4]],
-            self.yaw_range5[self.currentAngle[5]],
-            self.yaw_range5[self.currentAngle[6]],
-            0,
-            0,
-            0,
-            0
-        ])
+        yawList = []
+        for i in range(self.turbineNum):
+            yawList.append(self.yaw_range6[self.currentAngle[i]])
+        self.yaws = np.array(yawList)
+
         # self.yaws = np.array([
-        #     self.yaw_range1[self.currentAngle[0]],
-        #     0,
-        #     self.yaw_range1[self.currentAngle[2]],
-        #     30,
-        #     self.yaw_range1[self.currentAngle[4]],
-        #     -30,
-        #     self.yaw_range1[self.currentAngle[6]],
+        #     self.yaw_range6[self.currentAngle[0]],
+        #     self.yaw_range6[self.currentAngle[1]],
+        #     self.yaw_range6[self.currentAngle[2]],
+        #     self.yaw_range6[self.currentAngle[3]],
+        #     self.yaw_range6[self.currentAngle[4]],
+        #     self.yaw_range6[self.currentAngle[5]],
+        #     self.yaw_range6[self.currentAngle[6]],
         #     0,
         #     0,
         #     0,
@@ -111,9 +156,13 @@ class WindGym(object):
         for i in partialRange:
             influenceYaws[i] = 0
 
+        simutime1 = datetime.now()
         q = np.copy(self.simulator.run(influenceYaws))
+        simutime2 = datetime.now()
         influenceYaws[turbineId] = 0
         q_ = np.copy(self.simulator.run(influenceYaws))
+        simutime3 = datetime.now()
+        # print "1st simu", (simutime2-simutime1).seconds, "2nd simu", (simutime3-simutime2).seconds
 
         # print(self.simulator.floris.ws_array_0)
         # print(self.simulator.floris.floris_windframe_0.turbineX)
@@ -142,17 +191,24 @@ class WindGym(object):
         for i in partialRange:
             award += q[i] - q_[i]
 
-        # todo make log here
-        # print turbineId, "penaltyaward", penalty, award, "from", partialRange
+        partialReward = award + penalty
 
-        partialReward = award - penalty
+        # todo make log here
+        import logging
+        logger = logging.getLogger("wind_logger")
+        logstr = str(turbineId)+" action "+str(action)+" penaltyaward "+str(partialReward)+" ("+str(penalty)+" + "\
+                 + str(award)+") from "+ str(partialRange)
+        logger.info(logstr)
+        # print turbineId, "action", action, "penaltyaward", partialReward, penalty, award, "from", partialRange
+
+
         # return sum(pp.tolist())
         return partialReward
 
     def makeState(self, turbineId):
         # print("direction:", self.simulator.floris.floris_power_0.yaw)  #velocitiesTurbines_directions)
         stateRst = []
-        # 2+4+4*5 = 27
+        # 2+4+4*5 = 26
 
         # 2 features for main wind info [direction, speed]
         stateRst.append(self.simulator.wind_angle)
@@ -165,13 +221,17 @@ class WindGym(object):
         stateRst.append(self.turbineYw[turbineId])
 
         effRange = self.getRange(turbineId)
+        count = 0
         for i in effRange:
             stateRst.append(self.yaws[i])
             stateRst.append(self.simulator.floris.floris_power_0.velocitiesTurbines[i])
             stateRst.append(self.turbineXw[i])
             stateRst.append(self.turbineYw[i])
+            count += 1
+            if count >= 5:
+                break
 
-        while len(stateRst) < 27:
+        while len(stateRst) < 26:
             stateRst.append(0)
         # for j in range(len(effRange), 5):
         #     for kk in range(5):
@@ -201,6 +261,7 @@ class WindGym(object):
         self.turbineXw = xw
         self.turbineYw = yw
         # print index_order
+        return index_order
 
     def getRange(self, turbinId):
         label = -1
@@ -215,5 +276,5 @@ class WindGym(object):
                     continue
                 rstList.append(i)
                 label += 1
-        # print "range", rstList
+        # print turbinId, "range", rstList
         return rstList
