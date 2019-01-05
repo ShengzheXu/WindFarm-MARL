@@ -151,10 +151,22 @@ class WindGym(object):
 
         # set downsteam turbines to be greedy
         influenceYaws = np.copy(self.yaws)
-        partialRange = self.getRange(turbineId)
+        partialRange = self.getDownStream(turbineId)
         # print turbineId, partialRange
         for i in partialRange:
             influenceYaws[i] = 0
+
+        activeList = []
+        activeList.append(turbineId)
+        for i in partialRange:
+            activeList.append(i)
+        upStream = self.getUpStream(turbineId)
+        for i in upStream:
+            activeList.append(i)
+        # print turbineId, "up:", upStream, "down:", partialRange, "active:", activeList
+        from sim.ActiveTurbines import ActiveTurbines
+        activeTurbIo = ActiveTurbines()
+        activeTurbIo.writeActiveList(activeList)
 
         simutime1 = datetime.now()
         q = np.copy(self.simulator.run(influenceYaws))
@@ -220,7 +232,7 @@ class WindGym(object):
         stateRst.append(self.turbineXw[turbineId])
         stateRst.append(self.turbineYw[turbineId])
 
-        effRange = self.getRange(turbineId)
+        effRange = self.getDownStream(turbineId)
         count = 0
         for i in effRange:
             stateRst.append(self.yaws[i])
@@ -263,17 +275,41 @@ class WindGym(object):
         # print index_order
         return index_order
 
-    def getRange(self, turbinId):
+    def getUpStream(self, turbineId):
+        rstList = []
+        for i in self.indexOrder:
+            # selected by a rectangle, in the range of 1000m for y_up and y_down
+            if abs(self.turbineYw[i] - self.turbineYw[turbineId]) > 1000:
+                continue
+
+            if self.turbineXw[i] >= self.turbineXw[turbineId]:
+                continue
+            # selected by a sector
+            # if (self.turbineXw[i] - self.turbineXw[turbinId]) < abs(self.turbineYw[i] - self.turbineYw[turbinId]):
+            #     continue
+
+            rstList.append(i)
+
+        # print turbinId, "range", rstList
+        return rstList
+
+    def getDownStream(self, turbineId):
         label = -1
         rstList = []
         for i in self.indexOrder:
-            if turbinId == i:
+            if turbineId == i:
                 label = 0
             if label != -1:
-                if self.turbineXw[i] <= self.turbineXw[turbinId]:
+                # selected by a rectangle, in the range of 1000m for y_up and y_down
+                if abs(self.turbineYw[i] - self.turbineYw[turbineId]) > 1000:
                     continue
-                if (self.turbineXw[i] - self.turbineXw[turbinId]) < abs(self.turbineYw[i] - self.turbineYw[turbinId]):
+
+                if self.turbineXw[i] <= self.turbineXw[turbineId]:
                     continue
+                # selected by a sector
+                # if (self.turbineXw[i] - self.turbineXw[turbinId]) < abs(self.turbineYw[i] - self.turbineYw[turbinId]):
+                #     continue
+
                 rstList.append(i)
                 label += 1
         # print turbinId, "range", rstList

@@ -10,7 +10,7 @@ from support.Experience import Experience
 
 episode = 350
 # the data we're going to use is hourly
-simTime = 3 * 24
+simTime = 2 * 24
 turbineNum = 30
 
 # simm = WindGym(turbineNum=turbineNum)
@@ -41,7 +41,8 @@ def createLogger():
     fh.setLevel(logging.WARN)
 
     # create formatter
-    fmt = "%(asctime)-15s %(levelname)s %(filename)s %(lineno)d %(process)d ::: %(message)s"
+    # fmt = "%(asctime)-15s %(levelname)s %(filename)s %(lineno)d %(process)d ::: %(message)s"
+    fmt = "%(message)s"
     datefmt = "%a %d %b %Y %H:%M:%S"
     formatter = logging.Formatter(fmt, datefmt)
 

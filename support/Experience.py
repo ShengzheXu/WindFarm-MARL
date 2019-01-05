@@ -21,7 +21,9 @@ class Experience(object):
             item_ = (s, a, r, s_)
             # print "logging"
             logger = logging.getLogger("wind_logger")
-            logger.critical(str(item_))
+            logstr = str(turbineId)+ ":" + str(item_)
+            # logger.critical(str(item_))
+            logger.critical(logstr)
             self.exp[turbineId][-1] = item_
 
     def get(self, turbineId):

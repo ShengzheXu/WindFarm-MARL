@@ -478,12 +478,18 @@ class floris_power(Component):
         # find effective wind speeds at downstream turbines, then predict power downstream turbine
         self.velocitiesTurbines = np.tile(Vinf, nTurbines)
 
-        for turbI in range(0, nTurbines):
+        from ActiveTurbines import ActiveTurbines
+        activeTurbIo = ActiveTurbines()
+        activeList = activeTurbIo.readActiveList()
 
+        for turbI in range(0, nTurbines):
+            if turbI not in activeList:
+                continue
             # find overlap-area weighted effect of each wake zone
             wakeEffCoeff = 0
             for turb in range(0, nTurbines):
-
+                if turb not in activeList:
+                    continue
                 wakeEffCoeffPerZone = 0
                 deltax = turbineXw[turbI] - turbineXw[turb]
 
@@ -537,8 +543,16 @@ def calcOverlapAreas(turbineX,turbineY,rotorDiameter,wakeDiameters,wakeCenters):
 
     wakeOverlap = np.zeros((nTurbines,nTurbines,3))
 
+    from ActiveTurbines import ActiveTurbines
+    activeTurbIo = ActiveTurbines()
+    activeList = activeTurbIo.readActiveList()
+
     for turb in range(0,nTurbines):
+        if turb not in activeList:
+            continue
         for turbI in range(0,nTurbines):
+            if turbI not in activeList:
+                continue
             if turbineX[turbI] > turbineX[turb]:
                 OVdYd = wakeCenters[turbI,turb]-turbineY[turbI]
                 OVr = rotorDiameter[turbI]/2
