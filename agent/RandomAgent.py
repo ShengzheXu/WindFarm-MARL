@@ -3,7 +3,8 @@ import random
 
 
 class RandomAgent(AbstractAgent):
-    def __init__(self):
+    def __init__(self, actionNum):
+        self.actionNum = actionNum
         pass
 
     def doForward(self, state):
@@ -11,6 +12,8 @@ class RandomAgent(AbstractAgent):
         # action space is 0, 1, 2
         # actionDegree = random.randint(0, 2)
         # action space is 0 - 10
-        actionDegree = random.randint(0, 10)
+
+        # get random from [left, right]
+        actionDegree = random.randint(0, self.actionNum-1)
         # print(actionDegree)
         return actionDegree

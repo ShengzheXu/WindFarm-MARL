@@ -12,6 +12,11 @@ episode = 350
 # the data we're going to use is hourly
 simTime = 2 * 24
 turbineNum = 30
+actionNum = 31
+
+# modelType = "random"
+# modelType = "greedy"
+modelType = "dqn"
 
 # simm = WindGym(turbineNum=turbineNum)
 simm = WindGym(turbineNum=turbineNum, csvRead="csv")
@@ -19,8 +24,8 @@ simm = WindGym(turbineNum=turbineNum, csvRead="csv")
 
 agentWrapper = AgentWrapper()
 # agentWrapper.makeAgents(agentNum=turbineNum, type="random")
-# agentWrapper.makeAgents(agentNum=turbineNum, type="greedy")
-agentWrapper.makeAgents(agentNum=turbineNum, type="dqn")
+agentWrapper.makeAgents(agentNum=turbineNum, actionNum=actionNum, type=modelType)
+# agentWrapper.makeAgents(agentNum=turbineNum, type="dqn")
 agentExperience = Experience(turbineNum)
 
 # how to make these names?
@@ -91,7 +96,9 @@ def runner():
                 # state_ = simm.makeState()
                 # rewardComputer.store(turbineId, state, action, reward, state_)
 
-        print "eps", eps, ":", simm.epsTotalPower/epscount, "with explore rate:", 1-agentWrapper.models[0].agent.epsilon,
+        print "eps", eps, ":", simm.epsTotalPower / epscount,
+        if modelType == "dqn":
+            print "with explore rate:", 1-agentWrapper.models[0].agent.epsilon,
         plotPw.append(simm.epsTotalPower/epscount)
         simm.reset()
         for i in range(turbineNum):

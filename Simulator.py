@@ -104,7 +104,7 @@ class WindGym(object):
 
         self.currentAngle = []
         for i in range(0, self.turbineNum):
-            self.currentAngle.append(5)
+            self.currentAngle.append(15)
         self.makeAction()
 
     def makeAction(self):
