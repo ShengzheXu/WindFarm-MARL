@@ -101,8 +101,7 @@ class DoubleDQN:
             self.store_transition(s, a, r, s_)
 
     def forgot(self):
-        if not hasattr(self, 'memory_counter'):
-            self.memory_counter = 0
+        self.memory_counter = 0
         np.zeros((self.memory_size, self.n_features * 2 + 2))
 
     def store_transition(self, s, a, r, s_):
@@ -163,7 +162,7 @@ class DoubleDQN:
                                      feed_dict={self.s: batch_memory[:, :self.n_features],
                                                 self.q_target: q_target})
         self.cost_his.append(self.cost)
-
+        # print "trained ", self.cost_his
         # self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
 
         # non-linear increment

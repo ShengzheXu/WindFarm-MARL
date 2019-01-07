@@ -8,7 +8,7 @@ import logging
 # todo read exp runner setting from config file
 from support.Experience import Experience
 
-episode = 350
+episode = 220 #350
 # the data we're going to use is hourly
 simTime = 2 * 24
 turbineNum = 30
@@ -17,6 +17,7 @@ actionNum = 31
 # modelType = "random"
 # modelType = "greedy"
 modelType = "dqn"
+shareModel = True
 
 # simm = WindGym(turbineNum=turbineNum)
 simm = WindGym(turbineNum=turbineNum, csvRead="csv")
@@ -24,7 +25,7 @@ simm = WindGym(turbineNum=turbineNum, csvRead="csv")
 
 agentWrapper = AgentWrapper()
 # agentWrapper.makeAgents(agentNum=turbineNum, type="random")
-agentWrapper.makeAgents(agentNum=turbineNum, actionNum=actionNum, type=modelType)
+agentWrapper.makeAgents(agentNum=turbineNum, actionNum=actionNum, type=modelType, shareModel=shareModel)
 # agentWrapper.makeAgents(agentNum=turbineNum, type="dqn")
 agentExperience = Experience(turbineNum)
 
@@ -62,11 +63,18 @@ def runner():
     simm.getTurbineWYw()
     simm.miniStep(0, 0)
     plotPw = []
+    rewardPlot = {-1:[]}
+    for i in range(turbineNum):
+        rewardPlot[i] = []
 
     for eps in range(0, episode):
         epstime1 = datetime.now()
         epspw = 0
         epscount = 0
+        epsReward = {-1:0}
+        for i in range(turbineNum):
+            epsReward[i] = 0
+
         for timeI in range(0, simTime):
             simm.step()
 
@@ -89,21 +97,33 @@ def runner():
                 # Q: where to build reward and s'?
                 # A: the S_ is the S next time
                 reward = simm.miniStep(turbineId, action)
-                epspw += reward
+                epsReward[turbineId] += reward
                 epscount += 1.0
                 agentExperience.sup(turbineId, state)
                 agentExperience.add(turbineId, state, action, reward)
                 # state_ = simm.makeState()
                 # rewardComputer.store(turbineId, state, action, reward, state_)
 
+        for i in range(turbineNum):
+            rewardPlot[i].append(epsReward[i])
+
         print "eps", eps, ":", simm.epsTotalPower / epscount,
         if modelType == "dqn":
             print "with explore rate:", 1-agentWrapper.models[0].agent.epsilon,
         plotPw.append(simm.epsTotalPower/epscount)
         simm.reset()
-        for i in range(turbineNum):
-            exp = agentExperience.get(i)
-            agentWrapper.doBackward(i, exp)
+        if shareModel is True:
+            superExp = []
+            for i in range(turbineNum):
+                exp = agentExperience.get(i)
+                superExp.extend(exp)
+            agentWrapper.doBackward(0, superExp)
+            print "loss:", agentWrapper.getLoss(0),
+        else:
+            for i in range(turbineNum):
+                exp = agentExperience.get(i)
+                agentWrapper.doBackward(i, exp)
+                print "loss:", agentWrapper.getLoss(i)
 
         epstime2 = datetime.now()
         print ", time:", (epstime2-epstime1).seconds
@@ -112,10 +132,13 @@ def runner():
 
 
     print('total time', (endtime-starttime).seconds)
-    print(simm.epsTotalPowerRecord)
-    print(sum(simm.epsTotalPowerRecord)/len(simm.epsTotalPowerRecord))
-    print(simm.epsEachCount)
-    print plotPw
+    for i in range(turbineNum):
+        print i, ":", rewardPlot[i]
+    # print(rewardPlot)
+    # print(simm.epsTotalPowerRecord)
+    # print(sum(simm.epsTotalPowerRecord)/len(simm.epsTotalPowerRecord))
+    # print(simm.epsEachCount)
+    # print plotPw
 
 if __name__ == "__main__":
     createLogger()

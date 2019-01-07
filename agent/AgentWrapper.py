@@ -7,8 +7,9 @@ class AgentWrapper(object):
     def __init__(self):
         self.models = []
 
-    def makeAgents(self, agentNum, actionNum, type):
+    def makeAgents(self, agentNum, actionNum, type, shareModel=False):
         self.__init__()
+        self.shareModel = shareModel
         if type == 'dqn':
             self.sess = tf.Session()
         for i in range(agentNum):
@@ -23,8 +24,17 @@ class AgentWrapper(object):
             self.sess.run(tf.global_variables_initializer())
 
     def doForward(self, agentId, state):
+        if self.shareModel is True:
+            agentId = 0
         action = self.models[agentId].doForward(state)
         return action
 
     def doBackward(self, agentId, exp):
+        if self.shareModel is True:
+            agentId = 0
         self.models[agentId].doBackward(exp)
+
+    def getLoss(self, agentId):
+        if self.shareModel is True:
+            agentId = 0
+        return self.models[agentId].getLoss()

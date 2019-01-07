@@ -15,7 +15,7 @@ class DqnAgent(AbstractAgent):
             e_greedy_start = 0.7
             e_greedy_end = 0.99
             # greedy_increment = (e_greedy_end - e_greedy_start) / self.train_episode
-            greedy_increment = 0.99
+            greedy_increment = 0.985 # 0.99
         else:
             e_greedy_start = 0.7
             e_greedy_end = 0.7
@@ -36,5 +36,9 @@ class DqnAgent(AbstractAgent):
         return action_number
 
     def doBackward(self, experience):
+        # print experience
         self.agent.see(experience)
         self.agent.learn()
+
+    def getLoss(self):
+        return self.agent.cost_his[-1]
