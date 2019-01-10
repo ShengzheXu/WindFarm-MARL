@@ -94,24 +94,6 @@ class DoubleDQN:
 
             self.q_next = build_layers(self.s_, c_names, n_l1, w_initializer, b_initializer)
 
-    def see(self, experience):
-        self.forgot()
-        for item in experience:
-            s, a, r, s_ = item
-            self.store_transition(s, a, r, s_)
-
-    def forgot(self):
-        self.memory_counter = 0
-        np.zeros((self.memory_size, self.n_features * 2 + 2))
-
-    def store_transition(self, s, a, r, s_):
-        if not hasattr(self, 'memory_counter'):
-            self.memory_counter = 0
-        transition = np.hstack((s, [a, r], s_))
-        index = self.memory_counter % self.memory_size
-        self.memory[index, :] = transition
-        self.memory_counter += 1
-
     def choose_action(self, observation):
         observation = np.array(observation)
         observation = observation[np.newaxis, :]
@@ -127,16 +109,10 @@ class DoubleDQN:
             action = np.random.randint(0, self.n_actions)
         return action
 
-    def learn(self):
+    def learn(self, batch_memory):
         if self.learn_step_counter % self.replace_target_iter == 0:
             self.sess.run(self.replace_target_op)
             # print('\ntarget_params_replaced\n')
-
-        if self.memory_counter > self.memory_size:
-            sample_index = np.random.choice(self.memory_size, size=self.batch_size)
-        else:
-            sample_index = np.random.choice(self.memory_counter, size=self.batch_size)
-        batch_memory = self.memory[sample_index, :]
 
         q_next, q_eval4next = self.sess.run(
             [self.q_next, self.q_eval],
@@ -166,48 +142,17 @@ class DoubleDQN:
         # self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
 
         # non-linear increment
+        # p_epsilon = 1 - self.epsilon
+        # p_epsilon = 1 - (p_epsilon * self.epsilon_increment)
+        # self.epsilon = p_epsilon if self.epsilon < self.epsilon_max else self.epsilon_max
+        # end
+
+        self.learn_step_counter += 1
+
+    def decayExploreRate(self):
+        # non-linear increment
         p_epsilon = 1 - self.epsilon
         p_epsilon = 1 - (p_epsilon * self.epsilon_increment)
         self.epsilon = p_epsilon if self.epsilon < self.epsilon_max else self.epsilon_max
         # end
 
-        self.learn_step_counter += 1
-
-    # follows are implemented for batch bp
-    def _try_replace_target(self):
-        if self.learn_step_counter % self.replace_target_iter == 0:
-            self.sess.run(self.replace_target_op)
-            # print('\ntarget_params_replaced\n')
-
-    def dataflowProcess(self, q_eval, batch_memory, q_next, q_eval4next):
-        q_target = q_eval.copy()
-
-        batch_index = np.arange(self.batch_size, dtype=np.int32)
-        eval_act_index = batch_memory[:, self.n_features].astype(int)
-        reward = batch_memory[:, self.n_features + 1]
-
-        if self.double_q:
-            max_act4next = np.argmax(q_eval4next,
-                                     axis=1)  # the action that brings the highest value is evaluated by q_eval
-            selected_q_next = q_next[batch_index, max_act4next]  # Double DQN, select q_next depending on above actions
-        else:
-            selected_q_next = np.max(q_next, axis=1)  # the natural DQN
-
-        q_target[batch_index, eval_act_index] = reward + self.gamma * selected_q_next
-        return q_target
-
-    def pre_learn(self):
-        self._try_replace_target()
-
-        if self.memory_counter > self.memory_size:
-            sample_index = np.random.choice(self.memory_size, size=self.batch_size)
-        else:
-            sample_index = np.random.choice(self.memory_counter, size=self.batch_size)
-        batch_memory = self.memory[sample_index, :]
-        return batch_memory
-
-    def after_learn(self, the_cost):
-        self.cost_his.append(the_cost)
-
-        self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
-        self.learn_step_counter += 1

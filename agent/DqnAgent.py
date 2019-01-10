@@ -29,7 +29,6 @@ class DqnAgent(AbstractAgent):
         self.agent = double_DQN
         return double_DQN
 
-
     def doForward(self, state):
         # print (state)
         action_number = self.agent.choose_action(state)
@@ -37,8 +36,7 @@ class DqnAgent(AbstractAgent):
 
     def doBackward(self, experience):
         # print experience
-        self.agent.see(experience)
-        self.agent.learn()
+        self.agent.learn(experience)
 
     def getLoss(self):
         return self.agent.cost_his[-1]

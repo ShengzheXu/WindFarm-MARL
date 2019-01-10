@@ -10,9 +10,10 @@ from support.Experience import Experience
 
 episode = 220 #350
 # the data we're going to use is hourly
-simTime = 2 * 24
+simTime = 30 # 2 * 24
 turbineNum = 30
 actionNum = 31
+batchSize = 128
 
 # modelType = "random"
 # modelType = "greedy"
@@ -113,12 +114,17 @@ def runner():
         plotPw.append(simm.epsTotalPower/epscount)
         simm.reset()
         if shareModel is True:
-            superExp = []
-            for i in range(turbineNum):
-                exp = agentExperience.get(i)
-                superExp.extend(exp)
-            agentWrapper.doBackward(0, superExp)
-            print "loss:", agentWrapper.getLoss(0),
+            # superExp = []
+            # for i in range(turbineNum):
+            #     exp = agentExperience.get(i)
+            #     superExp.extend(exp)
+            totalExpNum = agentExperience.expLen(0) * turbineNum
+            print "learn plans", totalExpNum, batchSize, totalExpNum/batchSize
+            for i in range(totalExpNum/batchSize):
+                superExp = agentExperience.allSampleBatch(batchSize)
+                agentWrapper.doBackward(0, superExp)
+                print "loss:", agentWrapper.getLoss(0),
+            agentWrapper.decayExploreRate()
         else:
             for i in range(turbineNum):
                 exp = agentExperience.get(i)

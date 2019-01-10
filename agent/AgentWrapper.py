@@ -9,6 +9,7 @@ class AgentWrapper(object):
 
     def makeAgents(self, agentNum, actionNum, type, shareModel=False):
         self.__init__()
+        self.agentNum = agentNum
         self.shareModel = shareModel
         if type == 'dqn':
             self.sess = tf.Session()
@@ -38,3 +39,7 @@ class AgentWrapper(object):
         if self.shareModel is True:
             agentId = 0
         return self.models[agentId].getLoss()
+
+    def decayExploreRate(self):
+        for i in range(self.agentNum):
+            self.models[i].agent.decayExploreRate()
