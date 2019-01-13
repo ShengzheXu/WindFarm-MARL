@@ -2,43 +2,51 @@ import logging
 import numpy as np
 
 class Experience(object):
-    def __init__(self, agentNum):
+    def __init__(self, agentNum, memorysize=50000):
         self.exp = []
+        self.temp = []
+        self.memCount = []
         self.agentNum = agentNum
+        self.memorysize = memorysize
         for i in range(agentNum):
             nextExp = []
+            nextTemp = None
             self.exp.append(nextExp)
+            self.temp.append(nextTemp)
+            self.memCount.append(0)
         logging.basicConfig(filename='exp_logger.log', level=logging.INFO)
 
-    def add(self, turbineId, s, a, r):
-        item = (s, a, r)
-        self.exp[turbineId].append(item)
-
-    def sup(self, turbineId, s_):
-        if len(self.exp[turbineId]) > 0:
-            item = self.exp[turbineId][-1]
-            # print item
+    def add(self, turbineId, in_s, in_a, in_r):
+        if self.temp[turbineId] is not None:
+            # do sup
+            item = self.temp[turbineId]
             (s, a, r) = item
+            s_ = in_s
             item_ = np.hstack((s, [a, r], s_))
-            # item_ = (s, [a, r], s_)
+            # log_item_ = (s, [a, r], s_)
 
             # print "logging"
             logger = logging.getLogger("wind_logger")
-            logstr = str(turbineId)+ ":" + str(item_)
-            # logger.critical(str(item_))
+            logstr = str(turbineId) + ":" + str(item_)
             logger.critical(logstr)
-            self.exp[turbineId][-1] = item_
+
+            # store
+            ith = self.memCount[turbineId]
+            if ith < self.memorysize:
+                self.exp[turbineId].append(item_)
+            else:
+                self.exp[turbineId][ith%self.memorysize]
+            self.memCount[turbineId] += 1
+
+        item = (in_s, in_a, in_r)
+        self.temp[turbineId] = item
 
     def get(self, turbineId):
-        aExp = self.exp[turbineId]
-        if len(aExp[-1]) < 4:
-            aExp = aExp[:-1]
-        return aExp
+        return self.exp[turbineId]
 
     def expLen(self, turbinId):
         return len(self.exp[turbinId])
 
-    # todo: add memory size upper bound. It's ok now since number of Exp not large.
     def sampleBatch(self, turbineId, batch_size):
         aExp = self.get(turbineId)
         memory = np.array(aExp)
