@@ -9,7 +9,7 @@ import logging
 # todo read exp runner setting from config file
 from support.Experience import Experience
 
-episode = 220 #350
+episode = 250 #350
 # the data we're going to use is hourly
 simTime = 30 # 2 * 24
 turbineNum = 30
@@ -20,7 +20,7 @@ batchSize = 128
 # modelType = "greedy"
 modelType = "dqn"
 shareModel = True
-preTrainModel = True
+preTrainModel = False
 
 # simm = WindGym(turbineNum=turbineNum)
 simm = WindGym(turbineNum=turbineNum, csvRead="csv")
@@ -90,10 +90,10 @@ def runSimmEpisode():
             action = agentWrapper.doForward(turbineId, state)
             # Q: where to build reward and s'?
             # A: the S_ is the S next time
-            reward = simm.miniStep(turbineId, action)
+            reward, infoPackage = simm.miniStep(turbineId, action)
             epsReward[turbineId] += reward
             epscount += 1.0
-            agentExperience.add(turbineId, state, action, reward)
+            agentExperience.add(turbineId, state, action, reward, infoPackage)
             # state_ = simm.makeState()
             # rewardComputer.store(turbineId, state, action, reward, state_)
     return epsReward, epscount

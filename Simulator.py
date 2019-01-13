@@ -194,6 +194,9 @@ class WindGym(object):
         # pp[6] += q[10]
         # print(self.episode, self.stepCnt, turbineId, action, sum(pp.tolist()), pp.tolist())
         # print("power of 135: ", pp[1], pp[3], pp[5])
+
+        infoPackage = []
+
         self.epsTotalPower += sum(q.tolist())
         # self.epsTotalPower += pp[1] + pp[3] + pp[5]
         self.epsCount += 1
@@ -204,7 +207,10 @@ class WindGym(object):
             award += q[i] - q_[i]
 
         partialReward = award + penalty
-
+        infoPackage.append(str(sum(q.tolist())))
+        infoPackage.append(str(partialReward))
+        infoPackage.append(str(award))
+        infoPackage.append(str(penalty))
         # todo make log here
         import logging
         logger = logging.getLogger("wind_logger")
@@ -215,7 +221,7 @@ class WindGym(object):
 
 
         # return sum(pp.tolist())
-        return partialReward
+        return partialReward, infoPackage
 
     def makeState(self, turbineId):
         # print("direction:", self.simulator.floris.floris_power_0.yaw)  #velocitiesTurbines_directions)

@@ -16,7 +16,9 @@ class Experience(object):
             self.memCount.append(0)
         logging.basicConfig(filename='exp_logger.log', level=logging.INFO)
 
-    def add(self, turbineId, in_s, in_a, in_r):
+    def add(self, turbineId, in_s, in_a, in_r, infoPackage=None):
+        # print in_s
+        # print len(in_s), in_a, in_r
         if self.temp[turbineId] is not None:
             # do sup
             item = self.temp[turbineId]
@@ -27,10 +29,15 @@ class Experience(object):
 
             # print "logging"
             logger = logging.getLogger("wind_logger")
-            logstr = str(turbineId) + ":" + str(item_)
+            logstr = str(turbineId)
+            for num in item_:
+                logstr += "," + str(num)
+            if infoPackage is not None:
+                logstr += ",--," + ",".join(infoPackage)
             logger.critical(logstr)
 
             # store
+            # print(item_[26])
             ith = self.memCount[turbineId]
             if ith < self.memorysize:
                 self.exp[turbineId].append(item_)
