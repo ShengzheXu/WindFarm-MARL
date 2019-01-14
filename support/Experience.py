@@ -16,6 +16,10 @@ class Experience(object):
             self.memCount.append(0)
         logging.basicConfig(filename='exp_logger.log', level=logging.INFO)
 
+        logger = logging.getLogger("wind_logger")
+        headerstr = "turbinId,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,action,reward,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,s_,split,power,totalreward,award,penalty"
+        logger.critical(headerstr)
+
     def add(self, turbineId, in_s, in_a, in_r, infoPackage=None):
         # print in_s
         # print len(in_s), in_a, in_r
